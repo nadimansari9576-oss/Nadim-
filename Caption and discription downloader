@@ -1,0 +1,89 @@
+import React, { useState } from 'react';
+
+// Single-file React component (default export) // Tailwind CSS classes are used for styling (no import required in this snippet) // Features: // - Enter caption and description // - Quick sample captions in Hindi/English // - Preview area // - Download as .txt, .md, or .json // - Copy to clipboard
+
+export default function CaptionDownloader() { const [caption, setCaption] = useState(''); const [description, setDescription] = useState(''); const [lang, setLang] = useState('hi');
+
+const samples = { hi: [ 'Vibe > Words ✨', 'Bas ek look, hazaar kahaniyaan 📸', 'Apna time chal raha hai ⏳', ], en: [ 'Vibe > Words ✨', 'Just one look, a thousand stories 📸', 'Living my moment ⏳', ], };
+
+function downloadFile(filename, content, mime = 'text/plain') { const blob = new Blob([content], { type: mime }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+
+function handleDownloadTxt() { const text = Caption:\n${caption}\n\nDescription:\n${description}; downloadFile('caption_description.txt', text, 'text/plain'); }
+
+function handleDownloadMd() { const md = # Caption\n\n${caption}\n\n---\n\n## Description\n\n${description}; downloadFile('caption_description.md', md, 'text/markdown'); }
+
+function handleDownloadJson() { const data = { caption, description, language: lang, exportedAt: new Date().toISOString() }; downloadFile('caption_description.json', JSON.stringify(data, null, 2), 'application/json'); }
+
+async function handleCopy() { try { await navigator.clipboard.writeText(Caption:\n${caption}\n\nDescription:\n${description}); alert('Copied to clipboard'); } catch (e) { alert('Clipboard copy failed — please select and copy manually'); } }
+
+function insertSample(s) { setCaption(s); setDescription(prev => prev || (lang === 'hi' ? 'Yahan apni description likhen — chhota aur prabhavshali.' : 'Write a short, effective description here.')); }
+
+return ( <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4"> <div className="max-w-3xl w-full bg-white rounded-2xl shadow-lg p-6 grid gap-6"> <header className="flex items-start justify-between"> <div> <h1 className="text-2xl font-semibold">Caption & Description Downloader</h1> <p className="text-sm text-gray-600 mt-1">Caption aur description likhiye, preview dekhiye, phir download karein.</p> </div> <div className="flex items-center gap-2"> <label className="text-sm text-gray-600">Language</label> <select value={lang} onChange={e => setLang(e.target.value)} className="border rounded px-2 py-1"> <option value="hi">Hindi</option> <option value="en">English</option> </select> </div> </header>
+
+<section className="grid md:grid-cols-2 gap-4">
+      <div className="flex flex-col gap-3">
+        <label className="text-sm font-medium">Caption</label>
+        <textarea
+          value={caption}
+          onChange={e => setCaption(e.target.value)}
+          rows={3}
+          placeholder={lang === 'hi' ? 'Yahan caption likhen...' : 'Write caption here...'}
+          className="w-full border rounded p-3 resize-none"
+        />
+
+        <div className="flex gap-2 flex-wrap">
+          {samples[lang].map((s, i) => (
+            <button key={i} onClick={() => insertSample(s)} className="text-sm px-3 py-1 rounded bg-gray-100 border hover:bg-gray-200">
+              {s}
+            </button>
+          ))}
+        </div>
+
+        <label className="text-sm font-medium pt-3">Description</label>
+        <textarea
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          rows={6}
+          placeholder={lang === 'hi' ? 'Yahan description likhen...' : 'Write description here...'}
+          className="w-full border rounded p-3 resize-none"
+        />
+
+        <div className="flex gap-2 mt-2">
+          <button onClick={handleDownloadTxt} className="px-3 py-2 rounded-xl shadow-sm border">Download .txt</button>
+          <button onClick={handleDownloadMd} className="px-3 py-2 rounded-xl shadow-sm border">Download .md</button>
+          <button onClick={handleDownloadJson} className="px-3 py-2 rounded-xl shadow-sm border">Download .json</button>
+          <button onClick={handleCopy} className="px-3 py-2 rounded-xl shadow-sm border">Copy</button>
+        </div>
+      </div>
+
+      <aside className="border-l pl-4">
+        <h2 className="text-sm font-medium">Preview</h2>
+        <div className="mt-3 bg-gray-50 rounded p-3 min-h-[220px]">
+          <p className="text-lg font-semibold">{caption || <span className="text-gray-400">(Caption preview)</span>}</p>
+          <hr className="my-3" />
+          <p className="text-sm text-gray-700 whitespace-pre-wrap">{description || <span className="text-gray-400">(Description preview)</span>}</p>
+        </div>
+
+        <div className="mt-4">
+          <h3 className="text-sm font-medium">Quick actions</h3>
+          <div className="flex gap-2 mt-2">
+            <button onClick={() => { setCaption(''); setDescription(''); }} className="px-3 py-2 rounded border bg-white">Clear</button>
+            <button onClick={() => { navigator.clipboard.writeText(JSON.stringify({ caption, description })) }} className="px-3 py-2 rounded border bg-white">Copy JSON</button>
+          </div>
+        </div>
+
+        <div className="mt-4 text-xs text-gray-500">
+          <p>Note: Downloads work locally in the browser. Agar kisi aur format ki zaroorat ho to bataiye.</p>
+        </div>
+      </aside>
+    </section>
+
+    <footer className="flex items-center justify-between text-sm text-gray-600">
+      <div>Made with ❤️ — Caption Downloader</div>
+      <div>Exported on {new Date().toLocaleString()}</div>
+    </footer>
+  </div>
+</div>
+
+); }
+
